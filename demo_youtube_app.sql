@@ -27,7 +27,7 @@ prompt APPLICATION 572 - Demo Youtube Plugin
 -- Application Export:
 --   Application:     572
 --   Name:            Demo Youtube Plugin
---   Date and Time:   15:35 Wednesday March 16, 2016
+--   Date and Time:   21:10 Wednesday March 16, 2016
 --   Exported By:     JEFF
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -37,8 +37,9 @@ prompt APPLICATION 572 - Demo Youtube Plugin
 
 -- Application Statistics:
 --   Pages:                      1
---     Items:                    2
---     Regions:                  1
+--     Items:                    4
+--     Regions:                  3
+--     Buttons:                  1
 --     Dynamic Actions:          2
 --   Shared Components:
 --     Logic:
@@ -109,8 +110,9 @@ wwv_flow_api.create_flow(
 ,p_rejoin_existing_sessions=>'N'
 ,p_csv_encoding=>'Y'
 ,p_substitution_string_01=>'REPOSITORY'
+,p_substitution_value_01=>'https://github.com/jeffreykemp/jk64-plugin-youtube'
 ,p_last_updated_by=>'JEFF'
-,p_last_upd_yyyymmddhh24miss=>'20160316150052'
+,p_last_upd_yyyymmddhh24miss=>'20160316210924'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -7558,22 +7560,27 @@ wwv_flow_api.create_plugin(
 'is',
 '  subtype plugin_attr is varchar2(32767);',
 '  ',
-'  l_autoplay   plugin_attr := p_item.attribute_01; -- default is N',
-'  l_fullscreen plugin_attr := p_item.attribute_02; -- default is Y',
-'  l_related    plugin_attr := p_item.attribute_03; -- default is Y',
-'  l_start      plugin_attr := p_item.attribute_04;',
-'  l_end        plugin_attr := p_item.attribute_05;',
+'  l_autoplay       plugin_attr := p_item.attribute_01; -- default is N',
+'  l_fullscreen     plugin_attr := p_item.attribute_02; -- default is Y',
+'  l_related        plugin_attr := p_item.attribute_03; -- default is Y',
+'  l_start          plugin_attr := p_item.attribute_04;',
+'  l_end            plugin_attr := p_item.attribute_05;',
+'  l_iv_load_policy plugin_attr := p_item.attribute_06; -- default is Y (1)',
+'  l_loop           plugin_attr := p_item.attribute_07; -- default is N',
+'  l_show_info      plugin_attr := p_item.attribute_08; -- default is Y',
+'  l_controls       plugin_attr := p_item.attribute_09; -- default is Y',
 '  ',
-'  l_options varchar2(4000);',
+'  l_url_opt varchar2(1000);',
+'  l_ifr_opt varchar2(1000);',
 '  ',
 '  procedure append_opt (opt in varchar2, val in varchar2) is',
 '  begin',
-'    if l_options is null then',
-'      l_options := ''?'';',
+'    if l_url_opt is null then',
+'      l_url_opt := ''?'';',
 '    else',
-'      l_options := l_options || ''&'';',
+'      l_url_opt := l_url_opt || ''&'';',
 '    end if;',
-'    l_options := l_options || opt || ''='' || val;',
+'    l_url_opt := l_url_opt || opt || ''='' || val;',
 '  end append_opt;',
 'begin',
 '  if apex_application.g_debug then',
@@ -7583,35 +7590,36 @@ wwv_flow_api.create_plugin(
 '    );',
 '  end if;',
 '  ',
-'  append_opt(''autoplay'',TRANSLATE(l_autoplay,''YN'',''10''));',
-'  append_opt(''fs'',      TRANSLATE(l_fullscreen,''YN'',''10''));',
-'  append_opt(''rel'',     TRANSLATE(l_related,''YN'',''10''));',
-'  if l_start is not null then',
-'    append_opt(''start'',l_start);',
-'  end if;',
-'  if l_end is not null then',
-'    append_opt(''end'',l_end);',
+'  if l_autoplay = ''Y'' then append_opt(''autoplay'',''N''); end if;',
+'  if l_related = ''N'' then append_opt(''rel'',''0''); end if;',
+'  if l_start is not null then append_opt(''start'',l_start); end if;',
+'  if l_end is not null then append_opt(''end'',l_end); end if;',
+'  if l_iv_load_policy = ''N'' then append_opt(''l_iv_load_policy'',''3''); end if;',
+'  if l_loop = ''Y'' then append_opt(''loop'',''1''); append_opt(''playlist'',p_value); end if;',
+'  if l_show_info = ''N'' then append_opt(''showinfo'',''0''); end if;',
+'  if l_controls = ''N'' then append_opt(''controls'',''0''); end if;',
+'',
+'  if l_fullscreen = ''N'' then',
+'    append_opt(''fs'',''0'');',
+'  else',
+'    l_ifr_opt := ''allowfullscreen'';',
 '  end if;',
 '  ',
 '  sys.htp.p(''<iframe''',
 '    || '' id="UT-'' || p_item.id || ''"''',
 '    || '' width="'' || GREATEST(200,p_item.element_width) || ''px"''',
 '    || '' height="'' || GREATEST(200,p_item.element_height) || ''px"''',
-'    || '' src="'' || REPLACE(REPLACE(REPLACE(p_value',
-'                      ,''youtu.be/'', ''www.youtube.com/watch?v='')',
-'                      ,''/watch?v='', ''/embed/'')',
-'                      ,''http://'', ''https://'')',
-'                || l_options',
-'                || ''"''',
-'    || ''></iframe>'');',
+'    || '' src="https://www.youtube.com/embed/'' || p_value || l_url_opt || ''"''',
+'    || '' '' || l_ifr_opt || ''></iframe>'');',
 '',
 '  return null;',
 'end render_yt_item;'))
 ,p_render_function=>'render_yt_item'
-,p_standard_attributes=>'VISIBLE:SESSION_STATE:SOURCE:WIDTH:HEIGHT'
+,p_standard_attributes=>'VISIBLE:SOURCE:WIDTH:HEIGHT'
 ,p_substitute_attributes=>true
 ,p_subscribe_plugin_settings=>true
 ,p_version_identifier=>'0.1'
+,p_about_url=>'https://github.com/jeffreykemp/jk64-plugin-youtube'
 ,p_plugin_comment=>wwv_flow_utilities.join(wwv_flow_t_varchar2(
 'Some sample videos:',
 'https://www.youtube.com/watch?v=fwkJtgVswgM',
@@ -7640,7 +7648,7 @@ wwv_flow_api.create_plugin_attribute(
 ,p_prompt=>'Allow Fullscreen mode'
 ,p_attribute_type=>'CHECKBOX'
 ,p_is_required=>false
-,p_default_value=>'Y'
+,p_default_value=>'N'
 ,p_is_translatable=>false
 ,p_help_text=>'Set to No to hide the full-screen button in the player.'
 );
@@ -7653,7 +7661,7 @@ wwv_flow_api.create_plugin_attribute(
 ,p_prompt=>'Show Related Afterwards'
 ,p_attribute_type=>'CHECKBOX'
 ,p_is_required=>false
-,p_default_value=>'Y'
+,p_default_value=>'N'
 ,p_is_translatable=>false
 ,p_help_text=>'Set to No to stop "related" videos being offered after video ends.'
 );
@@ -7669,7 +7677,7 @@ wwv_flow_api.create_plugin_attribute(
 ,p_display_length=>5
 ,p_unit=>'seconds'
 ,p_is_translatable=>false
-,p_help_text=>'Set to the number of seconds from video start to start playing from.'
+,p_help_text=>'Set to the number of seconds from video start to start playing from. Substitution variable is allowed, e.g. &P1_START.'
 );
 wwv_flow_api.create_plugin_attribute(
  p_id=>wwv_flow_api.id(75272008976223391)
@@ -7683,7 +7691,59 @@ wwv_flow_api.create_plugin_attribute(
 ,p_display_length=>5
 ,p_unit=>'seconds'
 ,p_is_translatable=>false
-,p_help_text=>'Set to the point of the video to stop playing (that is, number of seconds from start of video, not relative to the "start from" attribute).'
+,p_help_text=>'Set to the point of the video to stop playing (that is, number of seconds from start of video, not relative to the "start from" attribute). Substitution variable is allowed, e.g. &P1_END.'
+);
+wwv_flow_api.create_plugin_attribute(
+ p_id=>wwv_flow_api.id(75321988708242649)
+,p_plugin_id=>wwv_flow_api.id(75257501389838464)
+,p_attribute_scope=>'COMPONENT'
+,p_attribute_sequence=>6
+,p_display_sequence=>60
+,p_prompt=>'Show video annotations by default'
+,p_attribute_type=>'CHECKBOX'
+,p_is_required=>false
+,p_default_value=>'N'
+,p_is_translatable=>false
+,p_help_text=>'This is the default setting for the player. The user can show/hide video annotations at runtime.'
+);
+wwv_flow_api.create_plugin_attribute(
+ p_id=>wwv_flow_api.id(75322907361285183)
+,p_plugin_id=>wwv_flow_api.id(75257501389838464)
+,p_attribute_scope=>'COMPONENT'
+,p_attribute_sequence=>7
+,p_display_sequence=>70
+,p_prompt=>'Loop'
+,p_attribute_type=>'CHECKBOX'
+,p_is_required=>false
+,p_default_value=>'N'
+,p_is_translatable=>false
+,p_help_text=>'Set to Yes to make the video play in a loop. (Note: if you set the Start and End attributes, they seem to only apply to the first playing; on the first repeat it seems to go back to playing the entire video)'
+);
+wwv_flow_api.create_plugin_attribute(
+ p_id=>wwv_flow_api.id(75324349488316335)
+,p_plugin_id=>wwv_flow_api.id(75257501389838464)
+,p_attribute_scope=>'COMPONENT'
+,p_attribute_sequence=>8
+,p_display_sequence=>80
+,p_prompt=>'Show info'
+,p_attribute_type=>'CHECKBOX'
+,p_is_required=>false
+,p_default_value=>'Y'
+,p_is_translatable=>false
+,p_help_text=>'Set to No to hide info like the video title, uploader, etc.'
+);
+wwv_flow_api.create_plugin_attribute(
+ p_id=>wwv_flow_api.id(75325216442335752)
+,p_plugin_id=>wwv_flow_api.id(75257501389838464)
+,p_attribute_scope=>'COMPONENT'
+,p_attribute_sequence=>9
+,p_display_sequence=>90
+,p_prompt=>'Show controls'
+,p_attribute_type=>'CHECKBOX'
+,p_is_required=>false
+,p_default_value=>'Y'
+,p_is_translatable=>false
+,p_help_text=>'Set to No to hide the player controls.'
 );
 end;
 /
@@ -7729,9 +7789,34 @@ wwv_flow_api.create_page(
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
-,p_help_text=>'No help is available for this page.'
+,p_help_text=>'More info and download plugin: <a href="&REPOSITORY.">&REPOSITORY.</a>'
 ,p_last_updated_by=>'JEFF'
-,p_last_upd_yyyymmddhh24miss=>'20160316145822'
+,p_last_upd_yyyymmddhh24miss=>'20160316210924'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(70255240871092621)
+,p_plug_name=>'Parameters'
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_plug_template=>wwv_flow_api.id(75227567528802460)
+,p_plug_display_sequence=>20
+,p_include_in_reg_disp_sel_yn=>'Y'
+,p_plug_new_grid_row=>false
+,p_plug_display_point=>'BODY'
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+,p_attribute_01=>'N'
+,p_attribute_02=>'HTML'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(70255348008092622)
+,p_plug_name=>'Notes'
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_component_template_options=>'#DEFAULT#'
+,p_plug_template=>wwv_flow_api.id(75227567528802460)
+,p_plug_display_sequence=>30
+,p_include_in_reg_disp_sel_yn=>'Y'
+,p_plug_display_point=>'BODY'
+,p_plug_source_type=>'NATIVE_HELP_TEXT'
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(75063538883626130)
@@ -7745,16 +7830,57 @@ wwv_flow_api.create_page_plug(
 ,p_attribute_01=>'N'
 ,p_attribute_02=>'HTML'
 );
+wwv_flow_api.create_page_button(
+ p_id=>wwv_flow_api.id(70255116007092620)
+,p_button_sequence=>50
+,p_button_plug_id=>wwv_flow_api.id(70255240871092621)
+,p_button_name=>'OK'
+,p_button_action=>'SUBMIT'
+,p_button_template_options=>'#DEFAULT#:t-Button--large:t-Button--primary'
+,p_button_template_id=>wwv_flow_api.id(75248446398802486)
+,p_button_is_hot=>'Y'
+,p_button_image_alt=>'Ok'
+,p_button_position=>'BELOW_BOX'
+,p_icon_css_classes=>'fa-check'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(70254945326092618)
+,p_name=>'P1_START'
+,p_item_sequence=>30
+,p_item_plug_id=>wwv_flow_api.id(70255240871092621)
+,p_prompt=>'Start'
+,p_post_element_text=>' seconds'
+,p_display_as=>'NATIVE_NUMBER_FIELD'
+,p_cSize=>10
+,p_field_template=>wwv_flow_api.id(75248049857802485)
+,p_item_template_options=>'#DEFAULT#'
+,p_attribute_01=>'0'
+,p_attribute_03=>'right'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(70255048729092619)
+,p_name=>'P1_END'
+,p_item_sequence=>40
+,p_item_plug_id=>wwv_flow_api.id(70255240871092621)
+,p_prompt=>'End'
+,p_post_element_text=>' seconds'
+,p_display_as=>'NATIVE_NUMBER_FIELD'
+,p_cSize=>10
+,p_field_template=>wwv_flow_api.id(75248049857802485)
+,p_item_template_options=>'#DEFAULT#'
+,p_attribute_01=>'0'
+,p_attribute_03=>'right'
+);
 wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(75064822869626143)
-,p_name=>'P1_URL'
-,p_item_sequence=>10
-,p_item_plug_id=>wwv_flow_api.id(75063538883626130)
-,p_item_default=>'https://www.youtube.com/watch?v=fwkJtgVswgM'
-,p_prompt=>'URL'
-,p_placeholder=>'URL of Youtube video'
+,p_name=>'P1_VIDEO_ID'
+,p_item_sequence=>20
+,p_item_plug_id=>wwv_flow_api.id(70255240871092621)
+,p_item_default=>'fwkJtgVswgM'
+,p_prompt=>'Youtube Video ID'
+,p_placeholder=>'Youtube video ID'
 ,p_display_as=>'NATIVE_TEXT_FIELD'
-,p_cSize=>100
+,p_cSize=>30
 ,p_field_template=>wwv_flow_api.id(75248049857802485)
 ,p_item_template_options=>'#DEFAULT#'
 ,p_attribute_01=>'N'
@@ -7763,29 +7889,35 @@ wwv_flow_api.create_page_item(
 ,p_attribute_05=>'BOTH'
 ,p_show_quick_picks=>'Y'
 ,p_quick_pick_label_01=>'Sample1'
-,p_quick_pick_value_01=>'https://www.youtube.com/watch?v=fwkJtgVswgM'
+,p_quick_pick_value_01=>'fwkJtgVswgM'
 ,p_quick_pick_label_02=>'Sample2'
-,p_quick_pick_value_02=>'https://www.youtube.com/watch?v=P5_GlAOCHyE'
+,p_quick_pick_value_02=>'P5_GlAOCHyE'
 ,p_quick_pick_label_03=>'Sample3'
-,p_quick_pick_value_03=>'https://www.youtube.com/watch?v=6pxRHBw-k8M'
+,p_quick_pick_value_03=>'GL0rbxB9Lqg'
 );
 wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(75065295038626147)
 ,p_name=>'P1_YOUTUBE'
-,p_item_sequence=>20
+,p_item_sequence=>10
 ,p_item_plug_id=>wwv_flow_api.id(75063538883626130)
 ,p_use_cache_before_default=>'NO'
-,p_prompt=>'Youtube Player Plug-In'
-,p_source=>'P1_URL'
+,p_prompt=>'Youtube Player Item Plug-In'
+,p_source=>'P1_VIDEO_ID'
 ,p_source_type=>'ITEM'
 ,p_display_as=>'PLUGIN_COM.JK64.YOUTUBE_PLAYER'
-,p_cSize=>600
-,p_cHeight=>450
-,p_field_template=>wwv_flow_api.id(75248049857802485)
+,p_cSize=>440
+,p_cHeight=>330
+,p_field_template=>wwv_flow_api.id(75248147649802485)
 ,p_item_template_options=>'#DEFAULT#'
 ,p_attribute_01=>'N'
 ,p_attribute_02=>'Y'
-,p_attribute_03=>'Y'
+,p_attribute_03=>'N'
+,p_attribute_04=>'&P1_START.'
+,p_attribute_05=>'&P1_END.'
+,p_attribute_06=>'N'
+,p_attribute_07=>'N'
+,p_attribute_08=>'Y'
+,p_attribute_09=>'Y'
 );
 wwv_flow_api.create_page_da_event(
  p_id=>wwv_flow_api.id(75064425697626139)
@@ -7817,7 +7949,7 @@ wwv_flow_api.create_page_da_event(
 ,p_name=>'submit on change'
 ,p_event_sequence=>30
 ,p_triggering_element_type=>'ITEM'
-,p_triggering_element=>'P1_URL'
+,p_triggering_element=>'P1_VIDEO_ID'
 ,p_triggering_condition_type=>'NOT_NULL'
 ,p_bind_type=>'bind'
 ,p_bind_event_type=>'change'
