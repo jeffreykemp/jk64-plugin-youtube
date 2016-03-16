@@ -15,3 +15,5 @@ https://apex.oracle.com/pls/apex/f?p=YOUTUBE_DEMO
 3. Add an item to the page, select type **Youtube Player [Plug-In]**
 4. Set the **Item Source** to the Youtube Video ID, e.g. `fwkJtgVswgM` - e.g. this could be a static value or a database column
 5. Set the item **Width** and **Height** (in pixels) for the video player; for best results use a 4:3 or 16:9 ratio. Note: values less than 200 will be ignored.
+
+For more info, refer to the [WIKI](https://github.com/jeffreykemp/jk64-plugin-youtube/wiki).
