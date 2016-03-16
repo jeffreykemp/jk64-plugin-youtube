@@ -1,0 +1,33 @@
+{
+  "name" : "Youtube Player",
+  "version" : "0.1",
+  "description" : "Youtube Player item plugin",
+  "keywords" : ["youtube"],
+  "homepage" : "https://github.com/jeffreykemp/jk64-plugin-youtube",
+  "bugs" : {
+    "url" : "https://github.com/jeffreykemp/jk64-plugin-youtube/issues",
+    "email" : "jeffrey.kemp@jk64.com"
+  },
+  "license" : "MIT",
+  "author" : {
+    "name" : "Jeffrey Kemp",
+    "email" : "jeffrey.kemp@jk64.com",
+    "url" : "http://jeffkemponoracle.com/"
+  },
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/jeffreykemp/jk64-plugin-youtube"
+  },
+ "oracle" : {
+    "versions" : ["11.2.0.1", "12.1.0.1"],
+    "apex" : {
+      "versions" : ["5.0.2"],
+      "plugin" : {
+        "internalName" : "COM.JK64.YOUTUBE_PLAYER",
+        "type" : "item",
+        "demo" : "https://apex.oracle.com/pls/apex/f?p=YOUTUBE_DEMO",
+        "previewImage" : "https://github.com/jeffreykemp/jk64-plugin-youtube/raw/master/preview.PNG"
+      }
+    }
+  }
+}
