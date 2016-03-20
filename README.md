@@ -6,7 +6,7 @@ This allows you to turn any item into a Youtube player. The item simply needs to
 
 ## DEMO ##
 
-https://apex.oracle.com/pls/apex/f?p=YOUTUBE_DEMO
+https://apex.oracle.com/pls/apex/f?p=YOUTUBE_DEMO&c=JK64
 
 ## INSTALLATION INSTRUCTIONS ##
 
