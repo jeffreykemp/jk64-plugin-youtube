@@ -25,7 +25,7 @@
       "plugin" : {
         "internalName" : "COM.JK64.YOUTUBE_PLAYER",
         "type" : "item",
-        "demo" : "https://apex.oracle.com/pls/apex/f?p=YOUTUBE_DEMO",
+        "demo" : "https://apex.oracle.com/pls/apex/f?p=YOUTUBE_DEMO&c=JK64",
         "previewImage" : "https://github.com/jeffreykemp/jk64-plugin-youtube/raw/master/preview.PNG"
       }
     }
