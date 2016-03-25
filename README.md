@@ -2,7 +2,7 @@
 
 This allows you to turn any item into a Youtube player. The item simply needs to be set to the Youtube Video ID.
 
-![preview.png](https://github.com/jeffreykemp/jk64-plugin-youtube/raw/master/preview.PNG)
+![preview.png](https://github.com/jeffreykemp/jk64-plugin-youtube/raw/master/src/preview.PNG)
 
 ## DEMO ##
 
