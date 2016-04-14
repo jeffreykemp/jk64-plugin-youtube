@@ -8,6 +8,10 @@ This allows you to turn any item into a Youtube player. The item simply needs to
 
 https://apex.oracle.com/pls/apex/f?p=YOUTUBE_DEMO&c=JK64
 
+## PRE-REQUISITES ##
+
+* [Oracle Application Express 5.0.2](https://apex.oracle.com)
+
 ## INSTALLATION INSTRUCTIONS ##
 
 1. Download the [latest release](https://github.com/jeffreykemp/jk64-plugin-youtube/releases/latest)
