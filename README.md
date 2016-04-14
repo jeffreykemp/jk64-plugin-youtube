@@ -1,4 +1,6 @@
-# Youtube Embed Item Plug-In for Oracle Application Express #
+# Youtube Embed #
+
+**An Item plugin for Oracle Application Express**
 
 This allows you to turn any item into a Youtube player. The item simply needs to be set to the Youtube Video ID.
 
