@@ -38,7 +38,7 @@ begin
     );
   end if;
   
-  if l_autoplay = 'Y' then append_opt('autoplay','N'); end if;
+  if l_autoplay = 'Y' then append_opt('autoplay','1'); end if;
   if l_related = 'N' then append_opt('rel','0'); end if;
   if l_start is not null then append_opt('start',l_start); end if;
   if l_end is not null then append_opt('end',l_end); end if;
