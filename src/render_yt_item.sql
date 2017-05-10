@@ -6,6 +6,7 @@ function render_yt_item (
     p_is_printer_friendly in boolean )
     return apex_plugin.t_page_item_render_result
 is
+-- Youtube Player Apex plugin v0.2
   subtype plugin_attr is varchar2(32767);
   
   l_autoplay       plugin_attr := p_item.attribute_01; -- default is N
@@ -38,11 +39,11 @@ begin
     );
   end if;
   
-  if l_autoplay = 'Y' then append_opt('autoplay','N'); end if;
+  if l_autoplay = 'Y' then append_opt('autoplay','1'); end if;
   if l_related = 'N' then append_opt('rel','0'); end if;
   if l_start is not null then append_opt('start',l_start); end if;
   if l_end is not null then append_opt('end',l_end); end if;
-  if l_iv_load_policy = 'N' then append_opt('l_iv_load_policy','3'); end if;
+  if l_iv_load_policy = 'N' then append_opt('iv_load_policy','3'); end if;
   if l_loop = 'Y' then append_opt('loop','1'); append_opt('playlist',p_value); end if;
   if l_show_info = 'N' then append_opt('showinfo','0'); end if;
   if l_controls = 'N' then append_opt('controls','0'); end if;
