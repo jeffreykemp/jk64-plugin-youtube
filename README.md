@@ -1,8 +1,8 @@
-# Youtube Embed ![APEX Plugin](https://cdn.rawgit.com/Dani3lSun/apex-github-badges/b7e95341/badges/apex-plugin-badge.svg)
+# Youtube Embed ![APEX Plugin](https://cdn.rawgit.com/Dani3lSun/apex-github-badges/b7e95341/badges/apex-plugin-badge.svg) ![APEX 18.2](https://cdn.rawgit.com/Dani3lSun/apex-github-badges/2fee47b7/badges/apex-18_2-badge.svg)
 
 **An Item plugin for Oracle Application Express**
 
-This allows you to turn any item into a Youtube player. The item simply needs to be set to the Youtube Video ID.
+This allows you to turn any item into a Youtube player. The item value simply needs to be set to the Youtube Video ID.
 
 ![preview.png](https://github.com/jeffreykemp/jk64-plugin-youtube/raw/master/src/preview.PNG)
 
@@ -12,7 +12,7 @@ https://apex.oracle.com/pls/apex/f?p=YOUTUBE_DEMO&c=JK64
 
 ## PRE-REQUISITES ##
 
-* [Oracle Application Express 5.0.2](https://apex.oracle.com)
+* [Oracle Application Express 18.2](https://apex.oracle.com)
 
 ## INSTALLATION INSTRUCTIONS ##
 
