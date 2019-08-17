@@ -27,7 +27,7 @@ prompt APPLICATION 572 - Demo Youtube Plugin
 -- Application Export:
 --   Application:     572
 --   Name:            Demo Youtube Plugin
---   Date and Time:   19:43 Saturday August 17, 2019
+--   Date and Time:   21:37 Saturday August 17, 2019
 --   Exported By:     JEFF
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -112,7 +112,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'REPOSITORY'
 ,p_substitution_value_01=>'https://github.com/jeffreykemp/jk64-plugin-youtube'
 ,p_last_updated_by=>'JEFF'
-,p_last_upd_yyyymmddhh24miss=>'20190817194312'
+,p_last_upd_yyyymmddhh24miss=>'20190817213603'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -7787,6 +7787,8 @@ wwv_flow_api.create_plugin(
 ,p_supported_component_types=>'APEX_APPLICATION_PAGE_ITEMS'
 ,p_image_prefix => nvl(wwv_flow_application_install.get_static_plugin_file_prefix('ITEM TYPE','COM.JK64.YOUTUBE_PLAYER'),'')
 ,p_plsql_code=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'-- Youtube Player plugin v1.0 Aug 2019',
+'',
 'subtype plugin_attr is varchar2(32767);',
 '',
 'procedure render',
@@ -7797,6 +7799,8 @@ wwv_flow_api.create_plugin(
 '  ) is',
 '  ',
 '  l_options        plugin_attr := p_item.attribute_01;',
+'  l_width          plugin_attr := p_item.attribute_02;',
+'  l_height         plugin_attr := p_item.attribute_03;',
 '  l_start          plugin_attr := p_item.attribute_04;',
 '  l_end            plugin_attr := p_item.attribute_05;',
 '  l_cc_lang_pref   plugin_attr := p_item.attribute_06;',
@@ -7823,33 +7827,45 @@ wwv_flow_api.create_plugin(
 '    );',
 '  end if;',
 '  ',
-'  if instr(l_options,''autoplay'')>0 then append_opt(''autoplay'',''1''); end if; --default is 0',
-'  if instr(l_options,''rel'')=0 then append_opt(''rel'',''0''); end if; --default is 1',
-'  if l_start is not null then append_opt(''start'',l_start); end if;',
-'  if l_end is not null then append_opt(''end'',l_end); end if;',
-'  if instr(l_options,''iv_load_policy'')=0 then append_opt(''iv_load_policy'',''3''); end if; --default is 1',
-'  if instr(l_options,''loop'')>0 then append_opt(''loop'',''1''); append_opt(''playlist'',sys.htf.escape_sc(p_param.value)); end if; --default is 0',
-'  if instr(l_options,''controls'')=0 then append_opt(''controls'',''0''); end if; --default is 1',
-'  if instr(l_options,''modestbranding'')>0 then append_opt(''modestbranding'',''1''); end if; --default is no',
-'  if instr(l_options,''disablekb'')>0 then append_opt(''disablekb'',''1''); end if; --default is 0',
-'  if l_cc_lang_pref is not null then append_opt(''cc_lang_pref'',l_cc_lang_pref); end if;',
+'  if instr(l_options,''list'')>0 then',
+'    append_opt(''listType'',''playlist'');',
+'    append_opt(''list'',sys.htf.escape_sc(p_param.value));',
+'  end if;',
+'',
+'  if instr(l_options,''autoplay'')>0 then append_opt(''autoplay'',''1''); end if; --default is 0 (don''t autoplay)',
+'  if instr(l_options,''fs'')=0 then append_opt(''fs'',''0''); end if; --default is 1 (allow full screen)',
+'  if instr(l_options,''rel'')=0 then append_opt(''rel'',''0''); end if; --default is 1 (show related videos from other channels)',
+'  if instr(l_options,''iv_load_policy'')=0 then append_opt(''iv_load_policy'',''3''); end if; --default is 1 (don''t show video annotations)',
+'  if instr(l_options,''controls'')=0 then append_opt(''controls'',''0''); end if; --default is 1 (show controls)',
+'  if instr(l_options,''modestbranding'')>0 then append_opt(''modestbranding'',''1''); end if; --default is standard youtube branding',
+'  if instr(l_options,''disablekb'')>0 then append_opt(''disablekb'',''1''); end if; --default is 0 (keyboard controls enabled)',
 '  if instr(l_options,''cc_load_policy'')>0 then append_opt(''cc_load_policy'',''1''); end if; --default is user pref',
+'',
+'  if instr(l_options,''loop'')>0 then',
+'     append_opt(''loop'',''1''); --default is 0 (don''t loop)',
+'     append_opt(''playlist'',sys.htf.escape_sc(p_param.value));',
+'  end if;',
+'',
+'  if l_cc_lang_pref is not null then append_opt(''cc_lang_pref'',l_cc_lang_pref); end if;',
 '  if l_color is not null then append_opt(''color'',l_color); end if;',
 '  if l_hl is not null then append_opt(''hl'',l_hl); end if;',
-'  if instr(l_options,''fs'')=0 then append_opt(''fs'',''0''); end if;',
+'  if l_start is not null then append_opt(''start'',l_start); end if;',
+'  if l_end is not null then append_opt(''end'',l_end); end if;',
 '  ',
 '  sys.htp.p(',
 '       ''<iframe id="'' || p_item.name || ''"''',
-'    || '' width="'' || greatest(200,p_item.element_width) || ''px"''',
-'    || '' height="'' || greatest(200,p_item.element_height) || ''px"''',
-'    || '' src="https://www.youtube.com/embed/'' || sys.htf.escape_sc(p_param.value) || l_opt || ''"''',
+'    || case when l_width is not null then '' width="'' || l_width || ''"'' end',
+'    || case when l_height is not null then '' height="'' || l_height || ''"'' end',
+'    || '' src="https://www.youtube.com/embed/''',
+'    || case when instr(l_options,''list'')=0 then sys.htf.escape_sc(p_param.value) end',
+'    || l_opt || ''"''',
 '    || case when instr(l_options,''fs'')>0 then '' allowfullscreen'' end',
 '    || ''></iframe>'');',
 '',
 'end render;'))
 ,p_api_version=>2
 ,p_render_function=>'render'
-,p_standard_attributes=>'VISIBLE:SOURCE:WIDTH:HEIGHT'
+,p_standard_attributes=>'VISIBLE:SOURCE'
 ,p_substitute_attributes=>true
 ,p_subscribe_plugin_settings=>true
 ,p_help_text=>'Generates a Youtube video player. The value of the item must be valid Youtube video ID. For example for <code>https://www.youtube.com/watch?v=fwkJtgVswgM</code>, the video ID is <code>fwkJtgVswgM</code>.'
@@ -7860,7 +7876,9 @@ wwv_flow_api.create_plugin(
 'https://www.youtube.com/watch?v=fwkJtgVswgM',
 'https://www.youtube.com/watch?v=P5_GlAOCHyE',
 'https://www.youtube.com/watch?v=6pxRHBw-k8M',
-'https://www.youtube.com/watch?v=oIXgef-Yw9E'))
+'https://www.youtube.com/watch?v=oIXgef-Yw9E',
+'',
+'Youtube API: https://developers.google.com/youtube/player_parameters'))
 );
 wwv_flow_api.create_plugin_attribute(
  p_id=>wwv_flow_api.id(39133865640483412)
@@ -7946,6 +7964,38 @@ wwv_flow_api.create_plugin_attr_value(
 ,p_display_value=>'Show Captions'
 ,p_return_value=>'cc_load_policy'
 ,p_help_text=>'Show closed captions by default, even if the user has turned captions off. The default behavior is based on user preference.'
+);
+wwv_flow_api.create_plugin_attr_value(
+ p_id=>wwv_flow_api.id(39176575038922215)
+,p_plugin_attribute_id=>wwv_flow_api.id(39133865640483412)
+,p_display_sequence=>100
+,p_display_value=>'Item value is a Play List'
+,p_return_value=>'list'
+,p_help_text=>'Play the playlist identified by the value of the item. Default is to interpret the value of the item as a single video ID.'
+);
+wwv_flow_api.create_plugin_attribute(
+ p_id=>wwv_flow_api.id(39173019756794015)
+,p_plugin_id=>wwv_flow_api.id(28308929752175819734)
+,p_attribute_scope=>'COMPONENT'
+,p_attribute_sequence=>2
+,p_display_sequence=>20
+,p_prompt=>'Width'
+,p_attribute_type=>'TEXT'
+,p_is_required=>false
+,p_is_translatable=>false
+,p_help_text=>'Width for the iframe. May be specified in pixels (e.g. <code>400px<code>) or percentage of container''s size (e.g. <code>100%</code>).'
+);
+wwv_flow_api.create_plugin_attribute(
+ p_id=>wwv_flow_api.id(39173666035795858)
+,p_plugin_id=>wwv_flow_api.id(28308929752175819734)
+,p_attribute_scope=>'COMPONENT'
+,p_attribute_sequence=>3
+,p_display_sequence=>30
+,p_prompt=>'Height'
+,p_attribute_type=>'TEXT'
+,p_is_required=>false
+,p_is_translatable=>false
+,p_help_text=>'Height for the iframe, typically specified in pixels (e.g. <code>400px<code>).'
 );
 wwv_flow_api.create_plugin_attribute(
  p_id=>wwv_flow_api.id(28308943691594200212)
@@ -8092,7 +8142,7 @@ wwv_flow_api.create_page(
 ,p_page_template_options=>'#DEFAULT#'
 ,p_help_text=>'More info and download plugin: <a href="&REPOSITORY.">&REPOSITORY.</a>'
 ,p_last_updated_by=>'JEFF'
-,p_last_upd_yyyymmddhh24miss=>'20190817194004'
+,p_last_upd_yyyymmddhh24miss=>'20190817213603'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(70255348008092622)
@@ -8123,17 +8173,17 @@ wwv_flow_api.create_page_item(
 ,p_name=>'P1_YOUTUBE'
 ,p_item_sequence=>10
 ,p_item_plug_id=>wwv_flow_api.id(75063538883626130)
-,p_use_cache_before_default=>'NO'
 ,p_item_default=>'fwkJtgVswgM'
 ,p_prompt=>'Youtube Player'
 ,p_source=>'P1_VIDEO_ID'
 ,p_source_type=>'ITEM'
 ,p_display_as=>'PLUGIN_COM.JK64.YOUTUBE_PLAYER'
-,p_cSize=>700
-,p_cHeight=>350
+,p_grid_label_column_span=>0
 ,p_field_template=>wwv_flow_api.id(75247940509802484)
 ,p_item_template_options=>'#DEFAULT#'
 ,p_attribute_01=>'autoplay:fs:controls:modestbranding:cc_load_policy'
+,p_attribute_02=>'100%'
+,p_attribute_03=>'400px'
 ,p_attribute_04=>'&P1_START.'
 ,p_attribute_05=>'&P1_END.'
 );
