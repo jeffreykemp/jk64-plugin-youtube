@@ -1,3 +1,4 @@
+prompt --application/set_environment
 set define off verify off feedback off
 whenever sqlerror exit sql.sqlcode rollback
 --------------------------------------------------------------------------------
@@ -5,68 +6,61 @@ whenever sqlerror exit sql.sqlcode rollback
 -- ORACLE Application Express (APEX) export file
 --
 -- You should run the script connected to SQL*Plus as the Oracle user
--- APEX_050100 or as the owner (parsing schema) of the application.
+-- APEX_180200 or as the owner (parsing schema) of the application.
 --
 -- NOTE: Calls to apex_application_install override the defaults below.
 --
 --------------------------------------------------------------------------------
 begin
 wwv_flow_api.import_begin (
- p_version_yyyy_mm_dd=>'2016.08.24'
-,p_release=>'5.1.1.00.08'
-,p_default_workspace_id=>69160808430820669492
-,p_default_application_id=>85353
-,p_default_owner=>'JK64'
+ p_version_yyyy_mm_dd=>'2018.05.24'
+,p_release=>'18.2.0.00.12'
+,p_default_workspace_id=>20749515040658038
+,p_default_application_id=>572
+,p_default_owner=>'SAMPLE'
 );
-end;
-/
-prompt --application/ui_types
-begin
-null;
 end;
 /
 prompt --application/shared_components/plugins/item_type/com_jk64_youtube_player
 begin
 wwv_flow_api.create_plugin(
- p_id=>wwv_flow_api.id(28269799090454535728)
+ p_id=>wwv_flow_api.id(28308929752175819734)
 ,p_plugin_type=>'ITEM TYPE'
 ,p_name=>'COM.JK64.YOUTUBE_PLAYER'
 ,p_display_name=>'Youtube Player'
 ,p_supported_ui_types=>'DESKTOP:JQM_SMARTPHONE'
 ,p_supported_component_types=>'APEX_APPLICATION_PAGE_ITEMS'
 ,p_plsql_code=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'function render_yt_item (',
-'    p_item                in apex_plugin.t_page_item,',
-'    p_plugin              in apex_plugin.t_plugin,',
-'    p_value               in varchar2,',
-'    p_is_readonly         in boolean,',
-'    p_is_printer_friendly in boolean )',
-'    return apex_plugin.t_page_item_render_result',
-'is',
-'  subtype plugin_attr is varchar2(32767);',
+'-- Youtube Player plugin v1.0 Aug 2019',
+'',
+'subtype plugin_attr is varchar2(32767);',
+'',
+'procedure render',
+'  (p_item   in            apex_plugin.t_item',
+'  ,p_plugin in            apex_plugin.t_plugin',
+'  ,p_param  in            apex_plugin.t_item_render_param',
+'  ,p_result in out nocopy apex_plugin.t_item_render_result',
+'  ) is',
 '  ',
-'  l_autoplay       plugin_attr := p_item.attribute_01; -- default is N',
-'  l_fullscreen     plugin_attr := p_item.attribute_02; -- default is Y',
-'  l_related        plugin_attr := p_item.attribute_03; -- default is Y',
+'  l_options        plugin_attr := p_item.attribute_01;',
 '  l_start          plugin_attr := p_item.attribute_04;',
 '  l_end            plugin_attr := p_item.attribute_05;',
-'  l_iv_load_policy plugin_attr := p_item.attribute_06; -- default is Y (1)',
-'  l_loop           plugin_attr := p_item.attribute_07; -- default is N',
-'  l_show_info      plugin_attr := p_item.attribute_08; -- default is Y',
-'  l_controls       plugin_attr := p_item.attribute_09; -- default is Y',
+'  l_cc_lang_pref   plugin_attr := p_item.attribute_06;',
+'  l_color          plugin_attr := p_item.attribute_07;',
+'  l_hl             plugin_attr := p_item.attribute_08;',
 '  ',
-'  l_url_opt varchar2(1000);',
-'  l_ifr_opt varchar2(1000);',
+'  l_opt varchar2(4000);',
 '  ',
 '  procedure append_opt (opt in varchar2, val in varchar2) is',
 '  begin',
-'    if l_url_opt is null then',
-'      l_url_opt := ''?'';',
+'    if l_opt is null then',
+'      l_opt := ''?'';',
 '    else',
-'      l_url_opt := l_url_opt || ''&'';',
+'      l_opt := l_opt || ''&'';',
 '    end if;',
-'    l_url_opt := l_url_opt || opt || ''='' || val;',
+'    l_opt := l_opt || opt || ''='' || val;',
 '  end append_opt;',
+'',
 'begin',
 '  if apex_application.g_debug then',
 '    apex_plugin_util.debug_page_item(',
@@ -75,85 +69,133 @@ wwv_flow_api.create_plugin(
 '    );',
 '  end if;',
 '  ',
-'  if l_autoplay = ''Y'' then append_opt(''autoplay'',''1''); end if;',
-'  if l_related = ''N'' then append_opt(''rel'',''0''); end if;',
+'  if instr(l_options,''autoplay'')>0 then append_opt(''autoplay'',''1''); end if; --default is 0',
+'  if instr(l_options,''rel'')=0 then append_opt(''rel'',''0''); end if; --default is 1',
 '  if l_start is not null then append_opt(''start'',l_start); end if;',
 '  if l_end is not null then append_opt(''end'',l_end); end if;',
-'  if l_iv_load_policy = ''N'' then append_opt(''iv_load_policy'',''3''); end if;',
-'  if l_loop = ''Y'' then append_opt(''loop'',''1''); append_opt(''playlist'',p_value); end if;',
-'  if l_show_info = ''N'' then append_opt(''showinfo'',''0''); end if;',
-'  if l_controls = ''N'' then append_opt(''controls'',''0''); end if;',
-'',
-'  if l_fullscreen = ''N'' then',
-'    append_opt(''fs'',''0'');',
-'  else',
-'    l_ifr_opt := ''allowfullscreen'';',
-'  end if;',
+'  if instr(l_options,''iv_load_policy'')=0 then append_opt(''iv_load_policy'',''3''); end if; --default is 1',
+'  if instr(l_options,''loop'')>0 then append_opt(''loop'',''1''); append_opt(''playlist'',sys.htf.escape_sc(p_param.value)); end if; --default is 0',
+'  if instr(l_options,''controls'')=0 then append_opt(''controls'',''0''); end if; --default is 1',
+'  if instr(l_options,''modestbranding'')>0 then append_opt(''modestbranding'',''1''); end if; --default is no',
+'  if instr(l_options,''disablekb'')>0 then append_opt(''disablekb'',''1''); end if; --default is 0',
+'  if l_cc_lang_pref is not null then append_opt(''cc_lang_pref'',l_cc_lang_pref); end if;',
+'  if instr(l_options,''cc_load_policy'')>0 then append_opt(''cc_load_policy'',''1''); end if; --default is user pref',
+'  if l_color is not null then append_opt(''color'',l_color); end if;',
+'  if l_hl is not null then append_opt(''hl'',l_hl); end if;',
+'  if instr(l_options,''fs'')=0 then append_opt(''fs'',''0''); end if;',
 '  ',
-'  sys.htp.p(''<iframe''',
-'    || '' id="UT-'' || p_item.id || ''"''',
-'    || '' width="'' || GREATEST(200,p_item.element_width) || ''px"''',
-'    || '' height="'' || GREATEST(200,p_item.element_height) || ''px"''',
-'    || '' src="https://www.youtube.com/embed/'' || p_value || l_url_opt || ''"''',
-'    || '' '' || l_ifr_opt || ''></iframe>'');',
+'  sys.htp.p(',
+'       ''<iframe id="'' || p_item.name || ''"''',
+'    || '' width="'' || greatest(200,p_item.element_width) || ''px"''',
+'    || '' height="'' || greatest(200,p_item.element_height) || ''px"''',
+'    || '' src="https://www.youtube.com/embed/'' || sys.htf.escape_sc(p_param.value) || l_opt || ''"''',
+'    || case when instr(l_options,''fs'')>0 then '' allowfullscreen'' end',
+'    || ''></iframe>'');',
 '',
-'  return null;',
-'end render_yt_item;'))
-,p_api_version=>1
-,p_render_function=>'render_yt_item'
+'end render;'))
+,p_api_version=>2
+,p_render_function=>'render'
 ,p_standard_attributes=>'VISIBLE:SOURCE:WIDTH:HEIGHT'
 ,p_substitute_attributes=>true
 ,p_subscribe_plugin_settings=>true
-,p_version_identifier=>'0.2'
+,p_help_text=>'Generates a Youtube video player. The value of the item must be valid Youtube video ID. For example for <code>https://www.youtube.com/watch?v=fwkJtgVswgM</code>, the video ID is <code>fwkJtgVswgM</code>.'
+,p_version_identifier=>'1.0'
 ,p_about_url=>'https://github.com/jeffreykemp/jk64-plugin-youtube'
 ,p_plugin_comment=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'Some sample videos:',
 'https://www.youtube.com/watch?v=fwkJtgVswgM',
 'https://www.youtube.com/watch?v=P5_GlAOCHyE',
-'https://www.youtube.com/watch?v=6pxRHBw-k8M'))
+'https://www.youtube.com/watch?v=6pxRHBw-k8M',
+'https://www.youtube.com/watch?v=oIXgef-Yw9E'))
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(28269810740161831903)
-,p_plugin_id=>wwv_flow_api.id(28269799090454535728)
+ p_id=>wwv_flow_api.id(39133865640483412)
+,p_plugin_id=>wwv_flow_api.id(28308929752175819734)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>1
 ,p_display_sequence=>10
-,p_prompt=>'Autoplay'
-,p_attribute_type=>'CHECKBOX'
+,p_prompt=>'Options'
+,p_attribute_type=>'CHECKBOXES'
 ,p_is_required=>false
-,p_default_value=>'N'
+,p_default_value=>'fs:controls'
 ,p_is_translatable=>false
-,p_help_text=>'Set to Yes to have video automatically start playing on page load.'
+,p_lov_type=>'STATIC'
 );
-wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(28269811807890908574)
-,p_plugin_id=>wwv_flow_api.id(28269799090454535728)
-,p_attribute_scope=>'COMPONENT'
-,p_attribute_sequence=>2
+wwv_flow_api.create_plugin_attr_value(
+ p_id=>wwv_flow_api.id(39134425526484787)
+,p_plugin_attribute_id=>wwv_flow_api.id(39133865640483412)
+,p_display_sequence=>10
+,p_display_value=>'Autoplay'
+,p_return_value=>'autoplay'
+,p_help_text=>'Start playing video automatically on page load.'
+);
+wwv_flow_api.create_plugin_attr_value(
+ p_id=>wwv_flow_api.id(39134897840485857)
+,p_plugin_attribute_id=>wwv_flow_api.id(39133865640483412)
 ,p_display_sequence=>20
-,p_prompt=>'Allow Fullscreen mode'
-,p_attribute_type=>'CHECKBOX'
-,p_is_required=>false
-,p_default_value=>'N'
-,p_is_translatable=>false
-,p_help_text=>'Set to No to hide the full-screen button in the player.'
+,p_display_value=>'Allow Full-Screen'
+,p_return_value=>'fs'
+,p_help_text=>'Show the full-screen button in the player.'
 );
-wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(28269812407778912576)
-,p_plugin_id=>wwv_flow_api.id(28269799090454535728)
-,p_attribute_scope=>'COMPONENT'
-,p_attribute_sequence=>3
+wwv_flow_api.create_plugin_attr_value(
+ p_id=>wwv_flow_api.id(39135209179487373)
+,p_plugin_attribute_id=>wwv_flow_api.id(39133865640483412)
 ,p_display_sequence=>30
-,p_prompt=>'Show Related Afterwards'
-,p_attribute_type=>'CHECKBOX'
-,p_is_required=>false
-,p_default_value=>'N'
-,p_is_translatable=>false
-,p_help_text=>'Set to No to stop "related" videos being offered after video ends.'
+,p_display_value=>'Show related videos from other channels'
+,p_return_value=>'rel'
+,p_help_text=>'Offer "related" videos from other channels after video ends. (If unticked, related videos from the same channel may be offered)'
+);
+wwv_flow_api.create_plugin_attr_value(
+ p_id=>wwv_flow_api.id(39135669470488674)
+,p_plugin_attribute_id=>wwv_flow_api.id(39133865640483412)
+,p_display_sequence=>40
+,p_display_value=>'Show video annotations by default'
+,p_return_value=>'iv_load_policy'
+,p_help_text=>'The user can show/hide video annotations at runtime.'
+);
+wwv_flow_api.create_plugin_attr_value(
+ p_id=>wwv_flow_api.id(39136061291489829)
+,p_plugin_attribute_id=>wwv_flow_api.id(39133865640483412)
+,p_display_sequence=>50
+,p_display_value=>'Loop'
+,p_return_value=>'loop'
+,p_help_text=>'Make the video play in a loop. (Note: if you set the Start and End attributes, they only apply to the first playing; on the first repeat it seems to go back to playing the entire video)'
+);
+wwv_flow_api.create_plugin_attr_value(
+ p_id=>wwv_flow_api.id(39136488663491176)
+,p_plugin_attribute_id=>wwv_flow_api.id(39133865640483412)
+,p_display_sequence=>60
+,p_display_value=>'Show controls'
+,p_return_value=>'controls'
+,p_help_text=>'Show the player controls.'
+);
+wwv_flow_api.create_plugin_attr_value(
+ p_id=>wwv_flow_api.id(39136854177492216)
+,p_plugin_attribute_id=>wwv_flow_api.id(39133865640483412)
+,p_display_sequence=>70
+,p_display_value=>'Modest branding'
+,p_return_value=>'modestbranding'
+,p_help_text=>'Hide the prominent Youtube logo.'
+);
+wwv_flow_api.create_plugin_attr_value(
+ p_id=>wwv_flow_api.id(39137226970496302)
+,p_plugin_attribute_id=>wwv_flow_api.id(39133865640483412)
+,p_display_sequence=>80
+,p_display_value=>'Disable keyboard'
+,p_return_value=>'disablekb'
+,p_help_text=>'Cause the player to not respond to keyboard controls.'
+);
+wwv_flow_api.create_plugin_attr_value(
+ p_id=>wwv_flow_api.id(39154415080942906)
+,p_plugin_attribute_id=>wwv_flow_api.id(39133865640483412)
+,p_display_sequence=>90
+,p_display_value=>'Show Captions'
+,p_return_value=>'cc_load_policy'
+,p_help_text=>'Show closed captions by default, even if the user has turned captions off. The default behavior is based on user preference.'
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(28269813029872916206)
-,p_plugin_id=>wwv_flow_api.id(28269799090454535728)
+ p_id=>wwv_flow_api.id(28308943691594200212)
+,p_plugin_id=>wwv_flow_api.id(28308929752175819734)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>4
 ,p_display_sequence=>40
@@ -166,8 +208,8 @@ wwv_flow_api.create_plugin_attribute(
 ,p_help_text=>'Set to the number of seconds from video start to start playing from. Substitution variable is allowed, e.g. &P1_START.'
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(28269813598040920655)
-,p_plugin_id=>wwv_flow_api.id(28269799090454535728)
+ p_id=>wwv_flow_api.id(28308944259762204661)
+,p_plugin_id=>wwv_flow_api.id(28308929752175819734)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>5
 ,p_display_sequence=>50
@@ -180,56 +222,73 @@ wwv_flow_api.create_plugin_attribute(
 ,p_help_text=>'Set to the point of the video to stop playing (that is, number of seconds from start of video, not relative to the "start from" attribute). Substitution variable is allowed, e.g. &P1_END.'
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(28269863577772939913)
-,p_plugin_id=>wwv_flow_api.id(28269799090454535728)
+ p_id=>wwv_flow_api.id(39153744062937077)
+,p_plugin_id=>wwv_flow_api.id(28308929752175819734)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>6
 ,p_display_sequence=>60
-,p_prompt=>'Show video annotations by default'
-,p_attribute_type=>'CHECKBOX'
+,p_prompt=>'Captions Language'
+,p_attribute_type=>'TEXT'
 ,p_is_required=>false
-,p_default_value=>'N'
+,p_max_length=>2
 ,p_is_translatable=>false
-,p_help_text=>'This is the default setting for the player. The user can show/hide video annotations at runtime.'
+,p_text_case=>'LOWER'
+,p_help_text=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'This parameter specifies the default language that the player will use to display captions. Set the parameter''s value to an ISO 639-1 two-letter language code (http://www.loc.gov/standards/iso639-2/php/code_list.php).',
+'<p>',
+'If you use this parameter and also set the Captions option on, then the player will show captions in the specified language when the player loads. If you do not also set the Captions option, then captions will not display by default, but will display'
+||' in the specified language if the user opts to turn captions on.'))
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(28269864496425982447)
-,p_plugin_id=>wwv_flow_api.id(28269799090454535728)
+ p_id=>wwv_flow_api.id(39156676589997686)
+,p_plugin_id=>wwv_flow_api.id(28308929752175819734)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>7
 ,p_display_sequence=>70
-,p_prompt=>'Loop'
-,p_attribute_type=>'CHECKBOX'
+,p_prompt=>'Progress bar colour'
+,p_attribute_type=>'SELECT LIST'
 ,p_is_required=>false
-,p_default_value=>'N'
 ,p_is_translatable=>false
-,p_help_text=>'Set to Yes to make the video play in a loop. (Note: if you set the Start and End attributes, they seem to only apply to the first playing; on the first repeat it seems to go back to playing the entire video)'
+,p_lov_type=>'STATIC'
+,p_help_text=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'This specifies the colour that will be used in the player''s video progress bar to highlight the amount of the video that the viewer has already seen. Valid parameter values are red and white, and, by default, the player uses the colour red in the vid'
+||'eo progress bar.',
+'<p>',
+'Note: Setting the colour parameter to white will disable the Modest Branding option.'))
+);
+wwv_flow_api.create_plugin_attr_value(
+ p_id=>wwv_flow_api.id(39157475965998439)
+,p_plugin_attribute_id=>wwv_flow_api.id(39156676589997686)
+,p_display_sequence=>10
+,p_display_value=>'white'
+,p_return_value=>'white'
+);
+wwv_flow_api.create_plugin_attr_value(
+ p_id=>wwv_flow_api.id(39157856777999094)
+,p_plugin_attribute_id=>wwv_flow_api.id(39156676589997686)
+,p_display_sequence=>20
+,p_display_value=>'red'
+,p_return_value=>'red'
+,p_help_text=>'(default)'
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(28269865938553013599)
-,p_plugin_id=>wwv_flow_api.id(28269799090454535728)
+ p_id=>wwv_flow_api.id(39160084923088590)
+,p_plugin_id=>wwv_flow_api.id(28308929752175819734)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>8
 ,p_display_sequence=>80
-,p_prompt=>'Show info'
-,p_attribute_type=>'CHECKBOX'
+,p_prompt=>'Interface language'
+,p_attribute_type=>'TEXT'
 ,p_is_required=>false
-,p_default_value=>'Y'
+,p_max_length=>2
 ,p_is_translatable=>false
-,p_help_text=>'Set to No to hide info like the video title, uploader, etc.'
-);
-wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(28269866805507033016)
-,p_plugin_id=>wwv_flow_api.id(28269799090454535728)
-,p_attribute_scope=>'COMPONENT'
-,p_attribute_sequence=>9
-,p_display_sequence=>90
-,p_prompt=>'Show controls'
-,p_attribute_type=>'CHECKBOX'
-,p_is_required=>false
-,p_default_value=>'Y'
-,p_is_translatable=>false
-,p_help_text=>'Set to No to hide the player controls.'
+,p_text_case=>'LOWER'
+,p_help_text=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'Sets the player''s interface language. The parameter value is an ISO 639-1 two-letter language code (http://www.loc.gov/standards/iso639-2/php/code_list.php) or a fully specified locale. For example, fr and fr-ca are both valid values. Other language '
+||'input codes, such as IETF language tags (BCP 47) might also be handled properly.',
+'<p>',
+'The interface language is used for tooltips in the player and also affects the default caption track. Note that YouTube might select a different caption track language for a particular user based on the user''s individual language preferences and the '
+||'availability of caption tracks.'))
 );
 end;
 /

@@ -1,6 +1,6 @@
 {
   "name" : "Youtube Player",
-  "version" : "0.2",
+  "version" : "1.0",
   "description" : "Youtube Player item plugin",
   "keywords" : ["youtube"],
   "homepage" : "https://github.com/jeffreykemp/jk64-plugin-youtube",
@@ -23,7 +23,7 @@
  "oracle" : {
     "versions" : ["11.2.0.1", "12.1.0.1"],
     "apex" : {
-      "versions" : ["5.0.2"],
+      "versions" : ["18.2.0"],
       "plugin" : {
         "internalName" : "COM.JK64.YOUTUBE_PLAYER",
         "type" : "item",
